@@ -36,7 +36,7 @@ do(State) ->
 
     [begin
          Opts = rebar_app_info:opts(AppInfo),
-         App = erlang:binary_to_atom(rebar_app_info:name(AppInfo)),
+         App = binary_to_atom(rebar_app_info:name(AppInfo), utf8),
          ProtoDir = filename:join(rebar_app_info:dir(AppInfo),
                                   application:get_env(App, proto_dir, "src")),
          IncDir = filename:join(rebar_app_info:dir(AppInfo), "include"),
