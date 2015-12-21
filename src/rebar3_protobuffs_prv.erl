@@ -36,7 +36,9 @@ do(State) ->
 
     [begin
          Opts = rebar_app_info:opts(AppInfo),
-         SourceDir = filename:join(rebar_app_info:dir(AppInfo), "src"),
+         App = erlang:binary_to_atom(rebar_app_info:name(AppInfo)),
+         ProtoDir = filename:join(rebar_app_info:dir(AppInfo),
+                                  application:get_env(App, proto_dir, "src")),
          IncDir = filename:join(rebar_app_info:dir(AppInfo), "include"),
          OutDir = rebar_app_info:out_dir(AppInfo),
          %% ensure all dirs exist
@@ -46,7 +48,7 @@ do(State) ->
          OutEbinDir = filename:join(OutDir, "ebin") ++ "/",
          filelib:ensure_dir(OutEbinDir ++ "/"),
 
-         FoundFiles = rebar_utils:find_files(SourceDir, ".*\\.proto\$"),
+         FoundFiles = rebar_utils:find_files(ProtoDir, ".*\\.proto\$"),
          CompileFun = fun(Source, _Opts) ->
                               proto_compile(Source, OutIncDir, OutEbinDir)
                       end,
