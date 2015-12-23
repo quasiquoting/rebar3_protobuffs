@@ -4,7 +4,7 @@
 
 -define(PROVIDER, 'compile').
 -define(NAMESPACE, protobuffs).
--define(DEPS, [app_discovery]).
+-define(DEPS, [{default, app_discovery}]).
 
 %% ===================================================================
 %% Public API
