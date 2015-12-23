@@ -36,9 +36,8 @@ do(State) ->
 
     [begin
          Opts = rebar_app_info:opts(AppInfo),
-         App = binary_to_atom(rebar_app_info:name(AppInfo), utf8),
          ProtoDir = filename:join(rebar_app_info:dir(AppInfo),
-                                  application:get_env(App, proto_dir, "src")),
+                                  proto_dir(AppInfo)),
          IncDir = filename:join(rebar_app_info:dir(AppInfo), "include"),
          OutDir = rebar_app_info:out_dir(AppInfo),
          %% ensure all dirs exist
@@ -50,7 +49,7 @@ do(State) ->
 
          FoundFiles = rebar_utils:find_files(ProtoDir, ".*\\.proto\$"),
          CompileFun = fun(Source, _Opts) ->
-                              proto_compile(Source, OutIncDir, OutEbinDir)
+                              proto_compile(Source, ProtoDir, OutIncDir, OutEbinDir)
                       end,
 
          rebar_base_compiler:run(Opts, [], FoundFiles, CompileFun)
@@ -58,10 +57,18 @@ do(State) ->
     {ok, State}.
 
 
-proto_compile(Source, IncDir, EbinDir) ->
-    ok = protobuffs_compile:scan_file(Source, [{output_include_dir, IncDir},
+proto_compile(Source, ProtoDir, IncDir, EbinDir) ->
+    ok = protobuffs_compile:scan_file(Source, [{imports_dir, [ProtoDir]},
+                                               {output_include_dir, IncDir},
                                                {output_ebin_dir, EbinDir}]).
 
 -spec format_error(any()) ->  iolist().
 format_error(Reason) ->
     io_lib:format("~p", [Reason]).
+
+-spec proto_dir(rebar_api_info:t()) -> string().
+proto_dir(AppInfo) ->
+  case proplists:get_value(env, rebar_app_info:app_details(AppInfo)) of
+    undefined ->     "src";
+    Env       -> proplists:get_value(proto_dir, Env, "src")
+  end.
